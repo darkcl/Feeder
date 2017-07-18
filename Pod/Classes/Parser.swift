@@ -8,12 +8,12 @@
 
 import Foundation
 
-class Parser: NSObject, NSXMLParserDelegate {
+class Parser: NSObject, XMLParserDelegate {
 
-    let url: NSURL
+    let url: URL
     let callback: Feeder.ParserCallback
     
-    var parser: NSXMLParser!
+    var parser: XMLParser!
     
     var entries = [Entry]()
     var format: Format?
@@ -21,44 +21,44 @@ class Parser: NSObject, NSXMLParserDelegate {
     
     var entry: Entry?
     
-    init(urlString: String, callback: Feeder.ParserCallback) {
-        url = NSURL(string: urlString)!
+    init(urlString: String, callback: @escaping Feeder.ParserCallback) {
+        url = URL(string: urlString)!
         self.callback = callback
         super.init()
         
-        let task = Feeder.shared.session.dataTaskWithURL(url) { data, response, error in
-            dispatch_async(dispatch_get_main_queue()) {
+        let task = Feeder.shared.session.dataTask(with: url, completionHandler: { data, response, error in
+            DispatchQueue.main.async {
                 if let data = data {
-                    self.parser = NSXMLParser(data: data)
+                    self.parser = XMLParser(data: data)
                     self.parser.delegate = self
                     self.parser.parse()
                 } else {
                     self.callback([Entry](), error)
                 }
             }
-        }
+        }) 
         task.resume()
     }
     
     // MARK: NSXMLParserDelegate
     
-    func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         switch (format, elementName) {
         case (_, "feed"):
-            format = .Atom
+            format = .atom
         case (_, "rss"):
-            format = .RSS
+            format = .rss
         case (_, "rdf:RDF"):
-            format = .RDF
-        case (.Atom?, "entry"), (.RSS?, "item"), (.RDF?, "item"):
+            format = .rdf
+        case (.atom?, "entry"), (.rss?, "item"), (.rdf?, "item"):
             entry = Entry()
-        case (.Atom?, "link"):
+        case (.atom?, "link"):
             entry?.href = attributeDict["href"] ?? ""
-        case (.Atom?, "content"):
+        case (.atom?, "content"):
             entry?.summary = ""
             self.elementName = elementName
-        case (.Atom?, "summary"):
-            if let summary = entry?.summary where summary.isEmpty {
+        case (.atom?, "summary"):
+            if let summary = entry?.summary, summary.isEmpty {
                 self.elementName = elementName
             }
         default:
@@ -66,32 +66,32 @@ class Parser: NSObject, NSXMLParserDelegate {
         }
     }
     
-    func parser(parser: NSXMLParser, foundCharacters string: String) {
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
         switch (format, elementName) {
         case (_, "title"?):
             entry?.title += string
-        case (.RSS?, "link"?), (.RDF?, "link"?):
+        case (.rss?, "link"?), (.rdf?, "link"?):
             entry?.href += string
-        case (.Atom?, "content"?), (.Atom?, "summary"?), (.RSS?, "description"?), (.RDF?, "description"?):
+        case (.atom?, "content"?), (.atom?, "summary"?), (.rss?, "description"?), (.rdf?, "description"?):
             entry?.summary += string
        default:
             break
         }
     }
     
-    func parserDidEndDocument(parser: NSXMLParser) {
+    func parserDidEndDocument(_ parser: XMLParser) {
         callback(entries, nil)
     }
     
-    func parser(parser: NSXMLParser, parseErrorOccurred parseError: NSError) {
+    func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         //print(parseError.localizedDescription)
     }
     
-    func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         self.elementName = nil
         guard let entry = entry else { return }
         switch (format, elementName) {
-        case (.Atom?, "entry"), (.RSS?, "item"), (.RDF?, "item"):
+        case (.atom?, "entry"), (.rss?, "item"), (.rdf?, "item"):
             entries.append(entry)
             self.entry = nil
         default:

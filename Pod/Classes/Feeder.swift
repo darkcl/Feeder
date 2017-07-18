@@ -8,23 +8,23 @@
 
 import Foundation
 
-public class Feeder {
-    public static let shared = Feeder()
+open class Feeder {
+    open static let shared = Feeder()
     
-    public typealias FinderCallback = (Page, NSError?) -> Void
-    public typealias ParserCallback = ([Entry], NSError?) -> Void
+    public typealias FinderCallback = (Page, Error?) -> Void
+    public typealias ParserCallback = ([Entry], Error?) -> Void
     
-    public var session = NSURLSession.sharedSession()
+    open var session = URLSession.shared
     
-    public func find(urlString: String, callback: FinderCallback) {
+    open func find(_ urlString: String, callback: @escaping FinderCallback) {
         let _ = Finder(urlString: urlString, callback: callback)
     }
 
-    public func parse(urlString: String, callback: ParserCallback) {
+    open func parse(_ urlString: String, callback: @escaping ParserCallback) {
         let _ = Parser(urlString: urlString, callback: callback)
     }
 
-    public func parse(feed: Feed, callback: ParserCallback) {
+    open func parse(_ feed: Feed, callback: @escaping ParserCallback) {
         parse(feed.href, callback: callback)
     }
 }

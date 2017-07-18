@@ -28,7 +28,7 @@ class ParserTests: XCTestCase {
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }
@@ -86,10 +86,10 @@ class ParserTests: XCTestCase {
         }
     }
 
-    private func parse(filename: String, callback: Feeder.ParserCallback) {
-        let expectation = expectationWithDescription("")
-        guard let path = NSBundle.mainBundle().pathForResource(filename, ofType: nil) else { return XCTFail() }
-        guard let data = NSData(contentsOfFile: path) else { return XCTFail() }
+    fileprivate func parse(_ filename: String, callback: @escaping Feeder.ParserCallback) {
+        let expectation = self.expectation(description: "")
+        guard let path = Bundle.main.path(forResource: filename, ofType: nil) else { return XCTFail() }
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return XCTFail() }
         let urlString = "http://example.com/\(filename)"
         
         Feeder.shared.session = MockSession(data: data)
@@ -98,6 +98,6 @@ class ParserTests: XCTestCase {
             callback(entries, error)
             expectation.fulfill()
         }
-        waitForExpectationsWithTimeout(1, handler: nil)
+        waitForExpectations(timeout: 1, handler: nil)
     }
 }

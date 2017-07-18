@@ -7,16 +7,16 @@
 //
 
 public enum Format {
-    case Atom, RSS, RDF
+    case atom, rss, rdf
     
     init?(contentType: String) {
         switch contentType {
         case "application/atom+xml":
-            self = .Atom
+            self = .atom
         case "application/rss+xml":
-            self = .RSS
+            self = .rss
         case "application/rdf+xml":
-            self = .RDF
+            self = .rdf
         default:
             return nil
         }

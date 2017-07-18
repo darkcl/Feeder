@@ -28,7 +28,7 @@ class FinderTests: XCTestCase {
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }
@@ -42,15 +42,15 @@ class FinderTests: XCTestCase {
                 
                 XCTAssertEqual(page.feeds.count, 3)
                 
-                XCTAssertEqual(page.feeds[0].format, Format.Atom)
+                XCTAssertEqual(page.feeds[0].format, Format.atom)
                 XCTAssertEqual(page.feeds[0].href, "http://example.com/posts.atom")
                 XCTAssertEqual(page.feeds[0].title, "Atom")
                 
-                XCTAssertEqual(page.feeds[1].format, Format.RSS)
+                XCTAssertEqual(page.feeds[1].format, Format.rss)
                 XCTAssertEqual(page.feeds[1].href, "http://example.com/posts.rss")
                 XCTAssertEqual(page.feeds[1].title, "RSS")
                 
-                XCTAssertEqual(page.feeds[2].format, Format.RDF)
+                XCTAssertEqual(page.feeds[2].format, Format.rdf)
                 XCTAssertEqual(page.feeds[2].href, "http://example.com/posts.rdf")
                 XCTAssertEqual(page.feeds[2].title, "RDF")
             }
@@ -65,7 +65,7 @@ class FinderTests: XCTestCase {
 
             XCTAssertEqual(page.feeds.count, 1)
             
-            XCTAssertEqual(page.feeds[0].format, Format.Atom)
+            XCTAssertEqual(page.feeds[0].format, Format.atom)
             XCTAssertTrue(page.feeds[0].href.hasSuffix(filename))
             XCTAssertEqual(page.feeds[0].title, "")
         }
@@ -79,7 +79,7 @@ class FinderTests: XCTestCase {
 
             XCTAssertEqual(page.feeds.count, 1)
             
-            XCTAssertEqual(page.feeds[0].format, Format.RSS)
+            XCTAssertEqual(page.feeds[0].format, Format.rss)
             XCTAssertTrue(page.feeds[0].href.hasSuffix(filename))
             XCTAssertEqual(page.feeds[0].title, "")
         }
@@ -93,16 +93,16 @@ class FinderTests: XCTestCase {
 
             XCTAssertEqual(page.feeds.count, 1)
             
-            XCTAssertEqual(page.feeds[0].format, Format.RDF)
+            XCTAssertEqual(page.feeds[0].format, Format.rdf)
             XCTAssertTrue(page.feeds[0].href.hasSuffix(filename))
             XCTAssertEqual(page.feeds[0].title, "")
         }
     }
     
-    private func find(filename: String, callback: Feeder.FinderCallback) {
-        let expectation = expectationWithDescription("")
-        guard let path = NSBundle.mainBundle().pathForResource(filename, ofType: nil) else { return XCTFail() }
-        guard let data = NSData(contentsOfFile: path) else { return XCTFail() }
+    fileprivate func find(_ filename: String, callback: @escaping Feeder.FinderCallback) {
+        let expectation = self.expectation(description: "")
+        guard let path = Bundle.main.path(forResource: filename, ofType: nil) else { return XCTFail() }
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return XCTFail() }
         let urlString = "http://example.com/\(filename)"
         
         Feeder.shared.session = MockSession(data: data)
@@ -111,6 +111,6 @@ class FinderTests: XCTestCase {
             callback(page, error)
             expectation.fulfill()
         }
-        waitForExpectationsWithTimeout(1, handler: nil)
+        waitForExpectations(timeout: 1, handler: nil)
     }
 }

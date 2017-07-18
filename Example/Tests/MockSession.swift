@@ -8,26 +8,26 @@
 
 import UIKit
 
-class MockSession: NSURLSession {
+class MockSession: URLSession {
     
-    let data: NSData
+    let data: Data
     
-    init(data: NSData) {
+    init(data: Data) {
         self.data = data
         super.init()
     }
     
-    override func dataTaskWithURL(url: NSURL, completionHandler: (NSData?, NSURLResponse?, NSError?) -> Void) -> NSURLSessionDataTask {
+    override func dataTask(with url: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
         return MockTask(data: data, completionHandler: completionHandler)
     }
 }
 
-class MockTask: NSURLSessionDataTask {
+class MockTask: URLSessionDataTask {
 
-    let data: NSData
-    let completionHandler: (NSData?, NSURLResponse?, NSError?) -> Void
+    let data: Data
+    let completionHandler: (Data?, URLResponse?, NSError?) -> Void
     
-    init(data: NSData, completionHandler: (NSData?, NSURLResponse?, NSError?) -> Void) {
+    init(data: Data, completionHandler: @escaping (Data?, URLResponse?, NSError?) -> Void) {
         self.data = data
         self.completionHandler = completionHandler
         super.init()

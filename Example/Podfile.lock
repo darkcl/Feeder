@@ -9,6 +9,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Feeder: 2c50c4daaedbdf7f61aab64bad3fa8a14169e63f
+  Feeder: 478e04a3f517d612bcd3a294bea3bb4a968980fe
 
-COCOAPODS: 0.39.0
+PODFILE CHECKSUM: a388796c3d5bcbf6b675eb26de66fe18c54bc28a
+
+COCOAPODS: 1.2.1
